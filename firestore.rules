@@ -1,0 +1,131 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        request.auth.token.email == 'kshakilrana2030@gmail.com'
+      );
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(userId) &&
+        request.resource.data.keys().hasAll(['id', 'email', 'role', 'status', 'createdAt', 'updatedAt']) &&
+        request.resource.data.id == userId &&
+        request.resource.data.role == 'user';
+      allow update: if (isOwner(userId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'photoURL', 'updatedAt'])) ||
+        isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Admins registry
+    match /admins/{adminId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Telegram accounts
+    match /telegramAccounts/{accountId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() &&
+        isValidId(accountId) &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.keys().hasAll(['id', 'userId', 'connectionType', 'status', 'autoReplyEnabled', 'createdAt', 'updatedAt']);
+      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin()) &&
+        request.resource.data.userId == resource.data.userId;
+      allow delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // AI Agents
+    match /aiAgents/{agentId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() &&
+        isValidId(agentId) &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.keys().hasAll(['id', 'userId', 'name', 'systemInstruction', 'provider', 'model', 'createdAt', 'updatedAt']);
+      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin()) &&
+        request.resource.data.userId == resource.data.userId;
+      allow delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // Prompts
+    match /prompts/{promptId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.isPublic == true || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.isPublic == true || isAdmin());
+      allow create: if isSignedIn() &&
+        isValidId(promptId) &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.keys().hasAll(['id', 'userId', 'title', 'category', 'content', 'createdAt', 'updatedAt']);
+      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin()) &&
+        request.resource.data.userId == resource.data.userId;
+      allow delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // Automations
+    match /automations/{automationId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() &&
+        isValidId(automationId) &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.keys().hasAll(['id', 'userId', 'name', 'enabled', 'triggerType', 'actionType', 'createdAt', 'updatedAt']);
+      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin()) &&
+        request.resource.data.userId == resource.data.userId;
+      allow delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // Automation Logs
+    match /automationLogs/{logId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() &&
+        isValidId(logId) &&
+        request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // Proxies
+    match /proxies/{proxyId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() &&
+        isValidId(proxyId) &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.keys().hasAll(['id', 'userId', 'name', 'protocol', 'host', 'port', 'status', 'createdAt', 'updatedAt']);
+      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin()) &&
+        request.resource.data.userId == resource.data.userId;
+      allow delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // System Settings & Feature Flags
+    match /systemSettings/{settingId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+  }
+}

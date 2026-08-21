@@ -1,0 +1,216 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Application user profile and settings",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "format": "email", "maxLength": 256 },
+        "displayName": { "type": "string", "maxLength": 128 },
+        "photoURL": { "type": "string", "maxLength": 1024 },
+        "role": { "type": "string", "enum": ["user", "admin", "superadmin"] },
+        "status": { "type": "string", "enum": ["active", "disabled", "suspended"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "email", "role", "status", "createdAt", "updatedAt"]
+    },
+    "TelegramAccount": {
+      "title": "TelegramAccount",
+      "description": "Connected Telegram user or bot account",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "telegramUserId": { "type": "string", "maxLength": 64 },
+        "phoneNumberMasked": { "type": "string", "maxLength": 32 },
+        "username": { "type": "string", "maxLength": 64 },
+        "firstName": { "type": "string", "maxLength": 128 },
+        "lastName": { "type": "string", "maxLength": 128 },
+        "photoUrl": { "type": "string", "maxLength": 1024 },
+        "connectionType": { "type": "string", "enum": ["user_mtproto", "bot_token", "tdlib"] },
+        "status": { "type": "string", "enum": ["connected", "disconnected", "needs_2fa", "connecting", "error"] },
+        "autoReplyEnabled": { "type": "boolean" },
+        "assignedAgentId": { "type": "string", "maxLength": 128 },
+        "assignedProvider": { "type": "string", "enum": ["gemini", "openai", "deepseek"] },
+        "assignedModel": { "type": "string", "maxLength": 64 },
+        "humanTakeoverPausedUntil": { "type": "string", "format": "date-time" },
+        "humanTakeoverDurationMinutes": { "type": "number" },
+        "proxyEnabled": { "type": "boolean" },
+        "proxyId": { "type": "string", "maxLength": 128 },
+        "dailyAiRepliesUsed": { "type": "number" },
+        "dailyAiRepliesMax": { "type": "number" },
+        "lastActivityAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "connectionType", "status", "autoReplyEnabled", "createdAt", "updatedAt"]
+    },
+    "AiAgent": {
+      "title": "AiAgent",
+      "description": "Custom AI agent configuration for automated or assisted replies",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 128 },
+        "description": { "type": "string", "maxLength": 512 },
+        "avatar": { "type": "string", "maxLength": 1024 },
+        "systemInstruction": { "type": "string", "maxLength": 8192 },
+        "personality": { "type": "string", "maxLength": 256 },
+        "languageMode": { "type": "string", "enum": ["multilingual", "bangla", "english", "auto"] },
+        "responseStyle": { "type": "string", "enum": ["friendly", "professional", "concise", "detailed", "casual", "humorous"] },
+        "maxResponseTokens": { "type": "number" },
+        "temperature": { "type": "number" },
+        "provider": { "type": "string", "enum": ["gemini", "openai", "deepseek"] },
+        "model": { "type": "string", "maxLength": 64 },
+        "memoryMode": { "type": "string", "enum": ["disabled", "conversation", "persistent", "window_10"] },
+        "replyDelaySeconds": { "type": "number" },
+        "simulateTyping": { "type": "boolean" },
+        "isDefault": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "name", "systemInstruction", "provider", "model", "createdAt", "updatedAt"]
+    },
+    "PromptTemplate": {
+      "title": "PromptTemplate",
+      "description": "Reusable prompt template with customizable variables",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 128 },
+        "category": { "type": "string", "maxLength": 64 },
+        "description": { "type": "string", "maxLength": 512 },
+        "content": { "type": "string", "maxLength": 4096 },
+        "variables": { "type": "string", "maxLength": 512 },
+        "isFavorite": { "type": "boolean" },
+        "isPublic": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "title", "category", "content", "createdAt", "updatedAt"]
+    },
+    "AutomationRule": {
+      "title": "AutomationRule",
+      "description": "Rule-based event trigger and automated action definition",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "telegramAccountId": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 128 },
+        "enabled": { "type": "boolean" },
+        "triggerType": { "type": "string", "enum": ["new_message", "keyword_match", "first_message", "schedule", "takeover_ended"] },
+        "triggerKeywords": { "type": "string", "maxLength": 512 },
+        "chatTypeFilter": { "type": "string", "enum": ["all", "private_only", "group_only", "channel_only"] },
+        "allowlist": { "type": "string", "maxLength": 1024 },
+        "blocklist": { "type": "string", "maxLength": 1024 },
+        "actionType": { "type": "string", "enum": ["ai_reply", "predefined_reply", "forward_alert", "pause_ai", "tag_chat"] },
+        "actionPayload": { "type": "string", "maxLength": 4096 },
+        "agentId": { "type": "string", "maxLength": 128 },
+        "cooldownSeconds": { "type": "number" },
+        "maxRunsPerUser": { "type": "number" },
+        "lastRunAt": { "type": "string", "format": "date-time" },
+        "runCount": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "name", "enabled", "triggerType", "actionType", "createdAt", "updatedAt"]
+    },
+    "AutomationLog": {
+      "title": "AutomationLog",
+      "description": "Audit record of automation rule or AI auto-reply execution",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "accountId": { "type": "string", "maxLength": 128 },
+        "ruleId": { "type": "string", "maxLength": 128 },
+        "chatId": { "type": "string", "maxLength": 128 },
+        "senderName": { "type": "string", "maxLength": 128 },
+        "incomingMessage": { "type": "string", "maxLength": 4096 },
+        "aiResponse": { "type": "string", "maxLength": 4096 },
+        "provider": { "type": "string", "maxLength": 64 },
+        "model": { "type": "string", "maxLength": 64 },
+        "tokensUsed": { "type": "number" },
+        "status": { "type": "string", "enum": ["success", "failed", "skipped_takeover", "rate_limited", "filtered"] },
+        "durationMs": { "type": "number" },
+        "errorMessage": { "type": "string", "maxLength": 1024 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "accountId", "chatId", "status", "createdAt"]
+    },
+    "ProxyConfig": {
+      "title": "ProxyConfig",
+      "description": "User configured SOCKS5 / MTProto proxy definition",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 128 },
+        "protocol": { "type": "string", "enum": ["socks5", "mtproto", "http"] },
+        "host": { "type": "string", "maxLength": 256 },
+        "port": { "type": "number" },
+        "status": { "type": "string", "enum": ["active", "offline", "untested"] },
+        "pingMs": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "name", "protocol", "host", "port", "status", "createdAt", "updatedAt"]
+    },
+    "SystemSetting": {
+      "title": "SystemSetting",
+      "description": "Platform-wide administrator settings and feature flags",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "maintenanceMode": { "type": "boolean" },
+        "allowNewRegistrations": { "type": "boolean" },
+        "maxAccountsPerUser": { "type": "number" },
+        "maxDailyAiRepliesPerUser": { "type": "number" },
+        "enabledProviders": { "type": "string", "maxLength": 256 },
+        "geminiDefaultModel": { "type": "string", "maxLength": 64 },
+        "workerHeartbeatMinutes": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "maintenanceMode", "allowNewRegistrations", "maxAccountsPerUser", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User account and profile data"
+    },
+    "/telegramAccounts/{accountId}": {
+      "schema": { "$ref": "#/entities/TelegramAccount" },
+      "description": "Connected Telegram accounts"
+    },
+    "/aiAgents/{agentId}": {
+      "schema": { "$ref": "#/entities/AiAgent" },
+      "description": "Configured AI Agents"
+    },
+    "/prompts/{promptId}": {
+      "schema": { "$ref": "#/entities/PromptTemplate" },
+      "description": "Custom and library prompt templates"
+    },
+    "/automations/{automationId}": {
+      "schema": { "$ref": "#/entities/AutomationRule" },
+      "description": "User automation rules"
+    },
+    "/automationLogs/{logId}": {
+      "schema": { "$ref": "#/entities/AutomationLog" },
+      "description": "Execution and audit logs for automations"
+    },
+    "/proxies/{proxyId}": {
+      "schema": { "$ref": "#/entities/ProxyConfig" },
+      "description": "User defined proxies"
+    },
+    "/systemSettings/{settingId}": {
+      "schema": { "$ref": "#/entities/SystemSetting" },
+      "description": "Global system configurations and feature flags"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "AI Telegram Platform",
+  "description": "Production-grade Telegram client with AI agent builder, multi-account manager, automation engine, and cloud-based AI auto-reply system.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
